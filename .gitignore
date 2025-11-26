@@ -1,0 +1,30 @@
+# Directorios de compilación
+/target/
+/bin/
+
+# Configuración del IDE (IntelliJ)
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Dependencias y artefactos
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-check-report.html
+dependency-check-report.json
+.mvn/wrapper/maven-wrapper.jar
+
+# Ficheros de log
+*.log
+
+# Archivos de configuración sensibles (si usas Spring Boot)
+# Por seguridad, ignora archivos que contengan información sensible
+# y sube solo una plantilla (por ejemplo, application.properties vacío)
+# Puedes ignorar archivos de perfil específicos para desarrollo local
+# Por ejemplo, si tienes 'application-dev.yml' con claves
+# application-dev.yml
