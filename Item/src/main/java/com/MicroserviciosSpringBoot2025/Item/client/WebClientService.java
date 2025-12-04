@@ -1,7 +1,10 @@
 package com.MicroserviciosSpringBoot2025.Item.client;
 
 import com.MicroserviciosSpringBoot2025.Item.entity.Product;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -10,34 +13,30 @@ import reactor.core.publisher.Mono;
 @Service
 public class WebClientService {
 
+    private static final Logger log = LoggerFactory.getLogger(WebClientService.class);
+
     @Autowired
     private WebClient webClient;
 
-    /**
-     * Retrieves all products asynchronously and non-blockingly.
-     * Returns a Flux<Product> that will emit elements as they arrive.
-     */
     public Flux<Product> findAll() {
         return webClient
                 .get()
-                // The target URL will be: http://product-service:8080/api/v1/products
                 .retrieve()
-                .bodyToFlux(Product.class); // Returns the reactive stream (Flux) directly
+                .bodyToFlux(Product.class);
     }
 
-    /**
-     * Retrieves a single product by ID asynchronously and non-blockingly.
-     * Returns a Mono<Product> that will emit 0 or 1 element.
-     */
     public Mono<Product> getProduct(Long id) {
+        log.info("Attempting to retrieve product with id: {}", id);
         return webClient
                 .get()
-                // Appends the ID to the base URI
                 .uri("/{id}", id)
                 .retrieve()
-                // Error handling (4xx or 5xx) is optional but recommended:
-                // .onStatus(httpStatus -> httpStatus.is4xxClientError(),
-                //           clientResponse -> Mono.error(new RuntimeException("Product not found")))
-                .bodyToMono(Product.class); // Returns the reactive publisher (Mono) directly
+                .onStatus(status -> status.isSameCodeAs(HttpStatus.NOT_FOUND),
+                          clientResponse -> {
+                              log.warn("Product not found (404) for id: {}", id);
+                              return Mono.empty();
+                          })
+                .bodyToMono(Product.class)
+                .log();
     }
 }

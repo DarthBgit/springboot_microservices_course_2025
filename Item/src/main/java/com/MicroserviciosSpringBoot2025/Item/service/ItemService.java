@@ -3,6 +3,7 @@ package com.MicroserviciosSpringBoot2025.Item.service;
 import com.MicroserviciosSpringBoot2025.Item.client.WebClientService;
 import com.MicroserviciosSpringBoot2025.Item.entity.Item;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Random;
@@ -24,7 +25,9 @@ public class ItemService {
     }
 
     public Mono<Item> getItem(Long id, Integer quantity) {
-        return webClientService.getProduct(id).map(product -> new Item(product, quantity));
+        return webClientService.getProduct(id)
+                .map(product -> new Item(product, quantity))
+                .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty()); // If a 404 occurs, return an empty Mono
     }
 
 }

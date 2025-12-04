@@ -2,6 +2,7 @@ package com.MicroserviciosSpringBoot2025.Item.controller;
 
 import com.MicroserviciosSpringBoot2025.Item.entity.Item;
 import com.MicroserviciosSpringBoot2025.Item.service.ItemService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,13 +41,10 @@ public class ItemController {
      * @param quantity The quantity for the item.
      * @return Mono<Item> - The reactive publisher for a single Item object.
      */
-    @GetMapping("/{id}/{quantity}") // Changed @RequestMapping to @GetMapping for clarity
-    public Mono<Item> getItem(@PathVariable Long id, @PathVariable Integer quantity) {
-        // We return the Mono directly from the service layer.
-        // WebFlux will handle the final result when the Mono completes.
-        return itemService.getItem(id, quantity);
-
-        // NOTE: In a real application, you might add error handling here,
-        // e.g., .switchIfEmpty(Mono.error(new ItemNotFoundException(id)))
+    @GetMapping("/{id}/{quantity}")
+    public Mono<ResponseEntity<Item>> getItem(@PathVariable Long id, @PathVariable Integer quantity) {
+        return itemService.getItem(id, quantity)
+                .map(ResponseEntity::ok) // If an item is found, wrap it in a 200 OK response
+                .defaultIfEmpty(ResponseEntity.notFound().build()); // If the Mono is empty (not found), create a 404 response
     }
 }
