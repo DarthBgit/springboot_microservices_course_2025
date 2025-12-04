@@ -1,43 +1,43 @@
 version: '3.8'
 
 services:
-  # Servicio de Base de Datos PostgreSQL
+  # PostgreSQL Database Service
   postgres-db:
     image: postgres:15-alpine
     container_name: postgres-db
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=productdb
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-    # AÑADIMOS EL VOLUMEN AQUÍ
+      # Use variables from the .env file
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      # Mapea el volumen nombrado 'postgres_data' al directorio donde Postgres guarda los datos dentro del contenedor
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d productdb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Definición del servicio de Productos
+  # Product Service Definition
   product-service:
     build: ./Product
     container_name: product-service
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/productdb
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
+      # Use variables from the .env file
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       postgres-db:
         condition: service_healthy
 
-  # Definición del servicio de Items
+  # Item Service Definition
   item-service:
     build: ./Item
     container_name: item-service
@@ -50,6 +50,5 @@ services:
       product-service:
         condition: service_started
 
-# DECLARAMOS EL VOLUMEN NOMBRADO EN LA RAÍZ DEL ARCHIVO
 volumes:
   postgres_data:

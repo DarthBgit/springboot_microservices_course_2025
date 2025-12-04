@@ -2,13 +2,9 @@ package com.MicroserviciosSpringBoot2025.Item.service;
 
 import com.MicroserviciosSpringBoot2025.Item.client.WebClientService;
 import com.MicroserviciosSpringBoot2025.Item.entity.Item;
-import com.MicroserviciosSpringBoot2025.Item.entity.Product;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @Service

@@ -1,15 +1,15 @@
-# Directorios de compilación
+# Compilation directories
 /target/
 /bin/
 
-# Configuración del IDE (IntelliJ)
+# IDE configuration (IntelliJ)
 .idea/
 *.iml
 *.iws
 *.ipr
 .vscode/
 
-# Dependencias y artefactos
+# Dependencies and artifacts
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -19,12 +19,15 @@ dependency-check-report.html
 dependency-check-report.json
 .mvn/wrapper/maven-wrapper.jar
 
-# Ficheros de log
+# Log files
 *.log
 
-# Archivos de configuración sensibles (si usas Spring Boot)
-# Por seguridad, ignora archivos que contengan información sensible
-# y sube solo una plantilla (por ejemplo, application.properties vacío)
-# Puedes ignorar archivos de perfil específicos para desarrollo local
-# Por ejemplo, si tienes 'application-dev.yml' con claves
+# Sensitive configuration files (if you use Spring Boot)
+# For security, ignore files that contain sensitive information
+# and only upload a template (e.g., empty application.properties)
+# You can ignore specific profile files for local development
+# For example, if you have 'application-dev.yml' with keys
 # application-dev.yml
+
+# Docker Compose environment variables file
+.env
