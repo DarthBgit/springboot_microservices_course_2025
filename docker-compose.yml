@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos PostgreSQL
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=productdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    # AÑADIMOS EL VOLUMEN AQUÍ
+    volumes:
+      # Mapea el volumen nombrado 'postgres_data' al directorio donde Postgres guarda los datos dentro del contenedor
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d productdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Definición del servicio de Productos
+  product-service:
+    build: ./Product
+    container_name: product-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/productdb
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+  # Definición del servicio de Items
+  item-service:
+    build: ./Item
+    container_name: item-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/products
+      - SERVER_PORT=8081
+    depends_on:
+      product-service:
+        condition: service_started
+
+# DECLARAMOS EL VOLUMEN NOMBRADO EN LA RAÍZ DEL ARCHIVO
+volumes:
+  postgres_data:
