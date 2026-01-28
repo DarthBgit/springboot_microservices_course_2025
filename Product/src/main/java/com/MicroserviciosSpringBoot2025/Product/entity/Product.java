@@ -39,4 +39,7 @@ public class Product {
     @Column(name = "last_modified_at")
     @LastModifiedDate
     private LocalDateTime lastModifiedAt;
+
+    @Transient
+    private Integer port;
 }

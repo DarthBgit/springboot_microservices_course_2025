@@ -15,8 +15,11 @@ public class WebClientService {
 
     private static final Logger log = LoggerFactory.getLogger(WebClientService.class);
 
-    @Autowired
-    private WebClient webClient;
+    private final WebClient webClient;
+
+    public WebClientService(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     public Flux<Product> findAll() {
         return webClient

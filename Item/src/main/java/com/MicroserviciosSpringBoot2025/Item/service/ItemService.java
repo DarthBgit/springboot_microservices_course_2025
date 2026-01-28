@@ -21,7 +21,6 @@ public class ItemService {
     public Flux<Item> findAll() {
         return webClientService.findAll()
                 .map(product -> new Item(product, random.nextInt(10 + 2)));
-
     }
 
     public Mono<Item> getItem(Long id, Integer quantity) {
