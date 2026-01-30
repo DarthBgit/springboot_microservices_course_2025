@@ -1,5 +1,6 @@
 package com.MicroserviciosSpringBoot2025.Item.controller;
 
+import com.MicroserviciosSpringBoot2025.Item.entity.InstanceStatusDTO;
 import com.MicroserviciosSpringBoot2025.Item.entity.ItemDTO;
 import com.MicroserviciosSpringBoot2025.Item.service.ItemServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/items")
@@ -32,6 +35,12 @@ public class ItemController {
         // WebFlux handles the subscription and streaming of the response.
         return itemServiceImpl.findAll();
     }
+
+    @GetMapping("/global_status")
+    public List<InstanceStatusDTO> getGlobalInstancesStatus() {
+        return itemServiceImpl.getGlobalStatus();
+    }
+
 
     /**
      * Endpoint to retrieve a single Item by ID and quantity.

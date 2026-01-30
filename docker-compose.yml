@@ -34,15 +34,21 @@ services:
   # --- Instance Spain ---
   product-es:
     build: ./Product
+    container_name: product-es
+    ports:
+      - "8080:8080" # Local access via 8080
+      - "5005:5005" # Debug access via 5005
     environment:
       - SPRING_APPLICATION_NAME=product-service
-      - APP_COUNTRY=ES
-      - SERVER_PORT=8080
+      - COUNTRY_CODE=ES
+      - COUNTRY_NAME=Spain
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+#      This line enabled debug mode for Intellij
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - micro-network
     depends_on:
@@ -54,15 +60,17 @@ services:
   # --- Instance UNITED KINGDOM ---
   product-uk:
     build: ./Product
+    container_name: product-uk
+    ports:
+      - "8082:8080"
     environment:
       - SPRING_APPLICATION_NAME=product-service
-      - APP_COUNTRY=UK
-      - SERVER_PORT=8080
+      - COUNTRY_CODE=uk
+      - COUNTRY_NAME=United Kingdom
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
       - micro-network
     depends_on:
@@ -72,15 +80,17 @@ services:
   # --- Instance USA ---
   product-us:
     build: ./Product
+    container_name: product-us
+    ports:
+      - "8083:8080"
     environment:
       - SPRING_APPLICATION_NAME=product-service
-      - APP_COUNTRY=US
-      - SERVER_PORT=8080
+      - COUNTRY_CODE=US
+      - COUNTRY_NAME=United States
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
       - micro-network
     depends_on:
@@ -90,15 +100,17 @@ services:
   # --- Instance CHINA ---
   product-cn:
     build: ./Product
+    container_name: product-cn
+    ports:
+      - "8084:8080"
     environment:
       - SPRING_APPLICATION_NAME=product-service
-      - APP_COUNTRY=CN
-      - SERVER_PORT=8080
+      - COUNTRY_CODE=CN
+      - COUNTRY_NAME=China
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
       - micro-network
     depends_on:
@@ -111,15 +123,25 @@ services:
     container_name: item-service
     ports:
       - "8081:8081"
+      - "5006:5005" # Debug access via 5006
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - PRODUCT_SERVICE_URL=http://product-service/api/v1/products
+#This line enabled debug mode for Intellij
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - micro-network
     depends_on:
-      product-service:
-        condition: service_started
       eureka-server:
+        condition: service_started
+      # Update these to match your new instance names
+      product-es:
+        condition: service_started
+      product-uk:
+        condition: service_started
+      product-us:
+        condition: service_started
+      product-cn:
         condition: service_started
 
 networks:

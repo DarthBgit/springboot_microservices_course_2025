@@ -8,9 +8,11 @@ import com.MicroserviciosSpringBoot2025.Item.mapper.ProductToItemDTO;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -22,6 +24,8 @@ public class ItemServiceImpl implements ItemService {
     private final WebClientService webClientService;
     // Dependency injection of DiscoveryClient to get info about red (Eureka client)
     private final DiscoveryClient discoveryClient;
+    // Dependency injection of Client rest
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public ItemServiceImpl(WebClientService webClientService, DiscoveryClient discoveryClient) {
         this.webClientService = webClientService;
@@ -49,15 +53,38 @@ public class ItemServiceImpl implements ItemService {
     /**
      * Get the status of all instances of the product-service registered in Eureka.
      */
-    public Flux<InstanceStatusDTO> getGlobalInstancesStatus() {
+
+    public List<InstanceStatusDTO> getGlobalStatus() {
+        // 1. Recuperamos las 4 instancias de Eureka (que ya vimos que funciona)
         List<ServiceInstance> instances = discoveryClient.getInstances("product-service");
-        return webClientService.getStatusInstances(instances);
+
+        return instances.stream().map(inst -> {
+            // 2. Construimos la URL interna (http://172.18.0.x:8080/api/v1/products/status)
+            String url = inst.getUri().toString() + "/api/v1/products/status";
+
+            try {
+                // 3. Llamada directa a la IP
+                Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+
+                return new InstanceStatusDTO(
+                        response.get("country_code") != null ? response.get("country_code").toString() : "UNKNOWN",
+                        response.get("country_name") != null ? response.get("country_name").toString() : "UNKNOWN",
+                        url,
+                        response.get("status") != null ? response.get("status").toString() : "DOWN",
+                        inst.getPort()
+                );
+            } catch (Exception e) {
+                // Si una instancia falla, que al menos nos diga por qué en el JSON
+                return new InstanceStatusDTO("ERROR", "ERROR", url, "DOWN (Connection Refused)", 0);
+            }
+        }).toList();
     }
 
     private ItemDTO createItemWithLogic(Product product, Integer quantity) {
         String lang = getMessageByCountry(product.getCountryCode());
         Double tax = getTaxByCountry(product.getCountryCode());
-        return ProductToItemDTO.map(product, quantity, tax, lang);
+        Double exchangeRate = getExchangeRate(product);
+        return ProductToItemDTO.map(product, exchangeRate, tax, quantity, lang);
     }
 
     private Double getTaxByCountry(String countryCode) {
@@ -65,7 +92,17 @@ public class ItemServiceImpl implements ItemService {
             case "ES" -> 1.21;
             case "UK" -> 1.20;
             case "US" -> 1.07;
+            case "CN" -> 1.05;
             default   -> 1.0;
+        };
+    }
+
+    private Double getExchangeRate(Product product) {
+        return switch (product.getCurrency()) {
+            case "GBP" -> 1.20;
+            case "USD" -> 0.92;
+            case "CNY" -> 0.13;
+            default    -> 1.0;
         };
     }
 

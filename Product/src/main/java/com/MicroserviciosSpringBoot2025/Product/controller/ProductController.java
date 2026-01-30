@@ -23,11 +23,11 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @Value("${app.country}")
-    private String countryNode; // ES, UK, US, CN get this value from docker-compose
+    @Value("${country.code}")
+    private String countryCode; // ES, UK, US, CN get this value from docker-compose
 
-    @Value("${server.port}")
-    private int serverPort; // get this value from application.properties or docker-compose
+    @Value("${country.name}")
+    private String countryName; // get this value from application.properties or docker-compose
 
     private final HealthEndpoint healthEndpoint;
 
@@ -40,6 +40,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findAll());
     }
 
+    //Example: http://localhost:8080/api/v1/products/country?countryCode=ES
     @GetMapping("/country")
     public ResponseEntity<List<ProductDTO>> getProductsByCountry(@RequestParam String countryCode) {
         return ResponseEntity.ok(productService.findByCountryCode(countryCode));
@@ -57,8 +58,8 @@ public class ProductController {
 
         String realStatus = healthEndpoint.health().getStatus().getCode();
 
-        response.put("node", countryNode);
-        response.put("port", serverPort);
+        response.put("country_code", countryCode);
+        response.put("country_name", countryName);
         response.put("status", realStatus);
         response.put("timestamp", LocalDateTime.now());
 

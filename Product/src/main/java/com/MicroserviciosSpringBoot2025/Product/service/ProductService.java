@@ -6,7 +6,9 @@ import com.MicroserviciosSpringBoot2025.Product.entity.ProductDTO;
 import com.MicroserviciosSpringBoot2025.Product.exception.ResourceNotFoundException;
 import com.MicroserviciosSpringBoot2025.Product.mapper.MapProductToDTO;
 import com.MicroserviciosSpringBoot2025.Product.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -17,8 +19,9 @@ public class ProductService {
 
 
     final private ProductRepository productRepository;
-    @Value("${server.port}")
-    private Integer port;
+    // Inject the Environment to get the runtime port
+    @Autowired
+    private Environment environment;
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -29,18 +32,18 @@ public class ProductService {
         return productRepository.findAll().stream()
         // Injecting the port information into the product
                 .map(product -> {
-                    product.setPort(port);
+                    product.setPort(environment.getProperty("local.server.port", Integer.class));
                     return MapProductToDTO.map(product);
                 }).collect(Collectors.toList());
     }
 
     @Transactional
     public List<ProductDTO> findByCountryCode(String countryCode) {
-        Country country = Country.valueOf(countryCode.toUpperCase());
+        Country countryEnum = Country.valueOf(countryCode.toUpperCase());
 
-        return productRepository.findProductsByCountryCode(countryCode).stream()
+        return productRepository.findProductsByCountryCode(countryEnum).stream()
                 .map(product -> {
-                    product.setPort(port);
+                    product.setPort(environment.getProperty("local.server.port", Integer.class));
                     return MapProductToDTO.map(product);
                 }).collect(Collectors.toList());
     }
@@ -49,7 +52,7 @@ public class ProductService {
     public ProductDTO findById(Long id) {
         return productRepository.findById(id).map(product -> {
             // Injecting the port information into the product
-            product.setPort(port);
+            product.setPort(environment.getProperty("local.server.port", Integer.class));
             return MapProductToDTO.map(product);
         })
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
@@ -71,7 +74,7 @@ public class ProductService {
         existingProduct.setCurrency(productDetails.getCurrency());
 
         Product updatedProduct = productRepository.save(existingProduct);
-        updatedProduct.setPort(port);
+        updatedProduct.setPort(environment.getProperty("local.server.port", Integer.class));
 
         return MapProductToDTO.map(updatedProduct);
     }

@@ -58,34 +58,4 @@ public class WebClientService {
                 .bodyToMono(Product.class)
                 .log();
     }
-
-    public Flux<InstanceStatusDTO> getStatusInstances(List<ServiceInstance> instances) {
-        // Convert the list of service instances into a reactive Flux
-        return Flux.fromIterable(instances)
-                .flatMap(instance -> {
-                    // Get the physical URI of the specific container (e.g., http://172.18.0.5:8080)
-                    String baseUrl = instance.getUri().toString();
-
-                    // Perform a direct HTTP GET request to the instance's status endpoint
-                    return webClient.get()
-                            .uri(baseUrl + "/api/v1/products/status")
-                            .retrieve()
-                            .bodyToMono(Map.class)
-                            .map(response -> new InstanceStatusDTO(
-                                    response.get("node").toString(),
-                                    baseUrl,
-                                    response.get("status").toString(),
-                                    (Integer) response.get("port")
-                            ))
-                            // Define a 2-second timeout to avoid hanging on unresponsive nodes
-                            .timeout(Duration.ofSeconds(2))
-                            // Fallback mechanism: if the node is down or times out, return a custom status
-                            .onErrorReturn(new InstanceStatusDTO(
-                                    "UNKNOWN",
-                                    baseUrl,
-                                    "DOWN / UNREACHABLE",
-                                    instance.getPort())
-                            );
-                });
-    }
 }

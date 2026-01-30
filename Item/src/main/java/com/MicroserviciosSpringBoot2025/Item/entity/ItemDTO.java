@@ -16,7 +16,7 @@ public class ItemDTO {
     private Double originalPrice;
     private String originalCurrency;
     private Double exchangeRate;
+    private Integer quantity;
     private Double priceInEur;
     private String country;
-    private Integer port;
 }

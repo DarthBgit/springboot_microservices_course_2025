@@ -12,6 +12,7 @@ public class MapProductToDTO {
         productDTO.setPrice(product.getPrice());
         productDTO.setCountryCode(product.getCountryCode().name());
         productDTO.setCurrency(product.getCurrency().name());
+        productDTO.setPort(product.getPort());
         return productDTO;
     }
 }
