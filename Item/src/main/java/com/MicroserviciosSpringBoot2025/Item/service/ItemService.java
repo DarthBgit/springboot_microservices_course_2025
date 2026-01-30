@@ -1,32 +1,11 @@
 package com.MicroserviciosSpringBoot2025.Item.service;
 
-import com.MicroserviciosSpringBoot2025.Item.client.WebClientService;
-import com.MicroserviciosSpringBoot2025.Item.entity.Item;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import com.MicroserviciosSpringBoot2025.Item.entity.ItemDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.Random;
 
-@Service
-public class ItemService {
-
-    private final Random random = new Random();
-    private final WebClientService webClientService;
-
-    public ItemService(WebClientService webClientService) {
-        this.webClientService = webClientService;
-    }
-
-    public Flux<Item> findAll() {
-        return webClientService.findAll()
-                .map(product -> new Item(product, random.nextInt(10 + 2)));
-    }
-
-    public Mono<Item> getItem(Long id, Integer quantity) {
-        return webClientService.getProduct(id)
-                .map(product -> new Item(product, quantity))
-                .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty()); // If a 404 occurs, return an empty Mono
-    }
-
+public interface ItemService {
+    Flux<ItemDTO> findAll();
+    Mono<ItemDTO> getItem(Long id, Integer quantity);
+    Flux<ItemDTO> findByCountry(String countryCode);
 }

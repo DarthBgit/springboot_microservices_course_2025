@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,9 +27,20 @@ public class Product {
     @NotBlank(message = "Product name cannot be blank")
     private String name;
 
+    @NotBlank(message = "Product description cannot be blank")
+    private String description;
+
     @NotNull(message = "Product price cannot be null")
     @Positive(message = "Product price must be positive")
     private Double price;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Country code cannot be null")
+    private Country countryCode;
+
+    @NotNull(message = "Currency cannot be null")
+    @Enumerated(EnumType.STRING)
+    private CurrencyEnum currency;
 
     @Column(name = "create_at")
     @CreatedDate

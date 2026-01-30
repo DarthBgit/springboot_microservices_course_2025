@@ -1,7 +1,7 @@
 package com.MicroserviciosSpringBoot2025.Item.controller;
 
-import com.MicroserviciosSpringBoot2025.Item.entity.Item;
-import com.MicroserviciosSpringBoot2025.Item.service.ItemService;
+import com.MicroserviciosSpringBoot2025.Item.entity.ItemDTO;
+import com.MicroserviciosSpringBoot2025.Item.service.ItemServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,10 +14,10 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v1/items")
 public class ItemController {
 
-    private final ItemService itemService;
+    private final ItemServiceImpl itemServiceImpl;
 
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
+    public ItemController(ItemServiceImpl itemServiceImpl) {
+        this.itemServiceImpl = itemServiceImpl;
     }
 
     /**
@@ -27,10 +27,10 @@ public class ItemController {
      * * @return Flux<Item> - The reactive stream of Item objects.
      */
     @GetMapping
-    public Flux<Item> getAllItems() {
+    public Flux<ItemDTO> getAllItems() {
         // We now return the Flux directly from the service layer.
         // WebFlux handles the subscription and streaming of the response.
-        return itemService.findAll();
+        return itemServiceImpl.findAll();
     }
 
     /**
@@ -42,8 +42,8 @@ public class ItemController {
      * @return Mono<Item> - The reactive publisher for a single Item object.
      */
     @GetMapping("/{id}/{quantity}")
-    public Mono<ResponseEntity<Item>> getItem(@PathVariable Long id, @PathVariable Integer quantity) {
-        return itemService.getItem(id, quantity)
+    public Mono<ResponseEntity<ItemDTO>> getItem(@PathVariable Long id, @PathVariable Integer quantity) {
+        return itemServiceImpl.getItem(id, quantity)
                 .map(ResponseEntity::ok) // If an item is found, wrap it in a 200 OK response
                 .defaultIfEmpty(ResponseEntity.notFound().build()); // If the Mono is empty (not found), create a 404 response
     }

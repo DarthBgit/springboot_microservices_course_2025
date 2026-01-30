@@ -1,4 +1,4 @@
-package com.MicroserviciosSpringBoot2025.Item.entity;
+package com.MicroserviciosSpringBoot2025.Product.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
-    private Long id;
+public class ProductDTO {
     private String name;
+    private String description;
     private Double price;
+    private String countryCode;
+    private String currency;
+    private Integer port;
 }

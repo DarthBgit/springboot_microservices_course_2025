@@ -1,6 +1,7 @@
 package com.MicroserviciosSpringBoot2025.Product.controller;
 
 import com.MicroserviciosSpringBoot2025.Product.entity.Product;
+import com.MicroserviciosSpringBoot2025.Product.entity.ProductDTO;
 import com.MicroserviciosSpringBoot2025.Product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,17 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.findAll());
     }
 
+    @GetMapping("/country")
+    public ResponseEntity<List<ProductDTO>> getProductsByCountry(@RequestParam String countryCode) {
+        return ResponseEntity.ok(productService.findByCountryCode(countryCode));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findById(id));
     }
 
@@ -33,7 +39,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody Product productDetails) {
+    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product productDetails) {
         return ResponseEntity.ok(productService.update(id, productDetails));
     }
 

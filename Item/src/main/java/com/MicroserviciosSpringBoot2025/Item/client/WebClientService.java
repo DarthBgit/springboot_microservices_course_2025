@@ -1,9 +1,8 @@
 package com.MicroserviciosSpringBoot2025.Item.client;
 
-import com.MicroserviciosSpringBoot2025.Item.entity.Product;
+import com.MicroserviciosSpringBoot2025.Item.entity.ProductDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,14 +20,26 @@ public class WebClientService {
         this.webClient = webClient;
     }
 
-    public Flux<Product> findAll() {
+    public Flux<ProductDTO> findAll() {
         return webClient
                 .get()
                 .retrieve()
-                .bodyToFlux(Product.class);
+                .bodyToFlux(ProductDTO.class);
     }
 
-    public Mono<Product> getProduct(Long id) {
+    public Flux<ProductDTO> findByCountry(String countryCode) {
+        log.info("Fetching products for country: {}", countryCode);
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/country")
+                        .queryParam("countryCode", countryCode)
+                        .build())
+                .retrieve()
+                .bodyToFlux(ProductDTO.class);
+    }
+
+    public Mono<ProductDTO> getProduct(Long id) {
         log.info("Attempting to retrieve product with id: {}", id);
         return webClient
                 .get()
@@ -39,7 +50,7 @@ public class WebClientService {
                               log.warn("Product not found (404) for id: {}", id);
                               return Mono.empty();
                           })
-                .bodyToMono(Product.class)
+                .bodyToMono(ProductDTO.class)
                 .log();
     }
 }
