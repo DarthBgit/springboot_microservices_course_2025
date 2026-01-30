@@ -3,7 +3,7 @@ package com.MicroserviciosSpringBoot2025.Item.entity;
 import lombok.*;
 
 @Data
-public class ProductDTO {
+public class Product {
     private Long id;
     private String name;
     private String description;

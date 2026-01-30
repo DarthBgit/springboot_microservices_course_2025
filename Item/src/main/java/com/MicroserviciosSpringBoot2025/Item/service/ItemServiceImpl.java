@@ -1,21 +1,31 @@
 package com.MicroserviciosSpringBoot2025.Item.service;
 
 import com.MicroserviciosSpringBoot2025.Item.client.WebClientService;
+import com.MicroserviciosSpringBoot2025.Item.entity.InstanceStatusDTO;
 import com.MicroserviciosSpringBoot2025.Item.entity.ItemDTO;
-import com.MicroserviciosSpringBoot2025.Item.entity.ProductDTO;
+import com.MicroserviciosSpringBoot2025.Item.entity.Product;
+import com.MicroserviciosSpringBoot2025.Item.mapper.ProductToItemDTO;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.List;
 import java.util.Random;
 
 @Service
 public class ItemServiceImpl implements ItemService {
 
     private final Random random = new Random();
-    private final WebClientService webClientService;
 
-    public ItemServiceImpl(WebClientService webClientService) {
+    // Dependency injection of WebClientService (HTTP client to make requests to product service)
+    private final WebClientService webClientService;
+    // Dependency injection of DiscoveryClient to get info about red (Eureka client)
+    private final DiscoveryClient discoveryClient;
+
+    public ItemServiceImpl(WebClientService webClientService, DiscoveryClient discoveryClient) {
         this.webClientService = webClientService;
+        this.discoveryClient = discoveryClient;
     }
 
     @Override
@@ -36,18 +46,18 @@ public class ItemServiceImpl implements ItemService {
                 .map(product -> createItemWithLogic(product, 1));
     }
 
-    private ItemDTO createItemWithLogic(ProductDTO product, Integer quantity) {
-        ItemDTO item = new ItemDTO(product, quantity);
+    /**
+     * Get the status of all instances of the product-service registered in Eureka.
+     */
+    public Flux<InstanceStatusDTO> getGlobalInstancesStatus() {
+        List<ServiceInstance> instances = discoveryClient.getInstances("product-service");
+        return webClientService.getStatusInstances(instances);
+    }
 
-        // Apply VAT based on the country provided in the Product DTO
-        double tax = getTaxByCountry(product.getCountryCode());
-        item.setTotalPrice(product.getPrice() * quantity * tax);
-
-        // A personalized message so the customer knows where it comes from
+    private ItemDTO createItemWithLogic(Product product, Integer quantity) {
         String lang = getMessageByCountry(product.getCountryCode());
-        item.setLocationSummary(lang + " " + product.getDescription());
-
-        return item;
+        Double tax = getTaxByCountry(product.getCountryCode());
+        return ProductToItemDTO.map(product, quantity, tax, lang);
     }
 
     private Double getTaxByCountry(String countryCode) {

@@ -31,14 +31,13 @@ services:
       retries: 5
 
   # --- Product Microservice ---
-  product-service:
+  # --- Instance Spain ---
+  product-es:
     build: ./Product
-    container_name: product-service
-    # We don't expose port 8080 externally if we want everything to go through Item or Gateway
-    # But we leave it for now for your tests
-    ports:
-      - "8080:8080"
     environment:
+      - SPRING_APPLICATION_NAME=product-service
+      - APP_COUNTRY=ES
+      - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -51,6 +50,60 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+
+  # --- Instance UNITED KINGDOM ---
+  product-uk:
+    build: ./Product
+    environment:
+      - SPRING_APPLICATION_NAME=product-service
+      - APP_COUNTRY=UK
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - micro-network
+    depends_on:
+      - postgres-db
+      - eureka-server
+
+  # --- Instance USA ---
+  product-us:
+    build: ./Product
+    environment:
+      - SPRING_APPLICATION_NAME=product-service
+      - APP_COUNTRY=US
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - micro-network
+    depends_on:
+      - postgres-db
+      - eureka-server
+
+  # --- Instance CHINA ---
+  product-cn:
+    build: ./Product
+    environment:
+      - SPRING_APPLICATION_NAME=product-service
+      - APP_COUNTRY=CN
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - micro-network
+    depends_on:
+      - postgres-db
+      - eureka-server
 
   # --- Item Microservice ---
   item-service:

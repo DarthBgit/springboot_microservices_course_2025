@@ -11,14 +11,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDTO {
-    private ProductDTO product;
-    private Integer quantity;
-    private Double totalPrice;
     private String locationSummary;
-    private String taxMessage;
-
-    public ItemDTO(ProductDTO product, Integer quantity) {
-        this.product = product;
-        this.quantity = quantity;
-    }
+    private String name;
+    private Double originalPrice;
+    private String originalCurrency;
+    private Double exchangeRate;
+    private Double priceInEur;
+    private String country;
+    private Integer port;
 }

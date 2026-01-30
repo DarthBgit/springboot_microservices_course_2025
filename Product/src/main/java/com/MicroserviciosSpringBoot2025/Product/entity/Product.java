@@ -36,6 +36,7 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Country code cannot be null")
+    @Column(name = "country_code")
     private Country countryCode;
 
     @NotNull(message = "Currency cannot be null")
