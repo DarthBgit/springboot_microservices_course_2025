@@ -144,6 +144,22 @@ services:
       product-cn:
         condition: service_started
 
+# --- Gateway Service ---
+  gateway-server:
+    build: ./GatewayServer
+    container_name: gateway-server
+    ports:
+      - "8090:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # Config for Gateway Timeouts (Must be higher than Resilience 4j timeouts)
+      - SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT=5000
+      - SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT=5s
+    networks:
+      - micro-network
+    depends_on:
+      - eureka-server
+
 networks:
   micro-network:
     driver: bridge
