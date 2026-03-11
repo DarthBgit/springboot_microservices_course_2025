@@ -144,7 +144,7 @@ services:
       product-cn:
         condition: service_started
 
-# --- Gateway Service . ---
+# --- Gateway Service ---
   gateway-server:
     build: ./GatewayServer
     container_name: gateway-server
