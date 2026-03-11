@@ -35,23 +35,41 @@ public class ProductController {
         this.healthEndpoint = healthEndpoint;
     }
 
+    /**
+     * Retrieves all products.
+     * @return A ResponseEntity containing a list of all products.
+     */
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.findAll());
     }
 
-    //Example: http://localhost:8080/api/v1/products/country?countryCode=ES
+    /**
+     * Retrieves products filtered by a specific country code.
+     * Example: http://localhost:8080/api/v1/products/country?countryCode=ES
+     * @param countryCode The country code to filter products by (e.g., "ES", "UK", "US", "CN").
+     * @return A ResponseEntity containing a list of products for the given country code.
+     */
     @GetMapping("/country")
     public ResponseEntity<List<ProductDTO>> getProductsByCountry(@RequestParam String countryCode) {
         return ResponseEntity.ok(productService.findByCountryCode(countryCode));
     }
 
+    /**
+     * Retrieves a product by its unique identifier.
+     * @param id The ID of the product to retrieve.
+     * @return A ResponseEntity containing the found product.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    // Status endpoint with additional info to simulate th status of the different instances ES, UK, US, CNn
+    /**
+     * Provides status information for the product service instance, including country details
+     * and health status. This endpoint simulates the status of different instances (ES, UK, US, CN).
+     * @return A Map containing country code, country name, health status, and current timestamp.
+     */
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
         Map<String, Object> response = new HashMap<>();
@@ -66,16 +84,32 @@ public class ProductController {
         return response;
     }
 
+    /**
+     * Creates a new product.
+     * @param product The product object to be created.
+     * @return A ResponseEntity containing the created product and HTTP status CREATED.
+     */
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
         return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
     }
 
+    /**
+     * Updates an existing product identified by its ID.
+     * @param id The ID of the product to update.
+     * @param productDetails The updated product details.
+     * @return A ResponseEntity containing the updated product.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product productDetails) {
         return ResponseEntity.ok(productService.update(id, productDetails));
     }
 
+    /**
+     * Deletes a product by its unique identifier.
+     * @param id The ID of the product to delete.
+     * @return A ResponseEntity with no content and HTTP status NO_CONTENT.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteById(id);
