@@ -16,6 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles all incoming HTTP requests for the /api/v1/products endpoint.
+ * This controller is the main entry point for interacting with Product data.
+ */
 @RestController
 @RequestMapping("api/v1/products")
 public class ProductController {
@@ -23,12 +27,15 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    // These values are injected from environment variables, making each instance unique.
+    // This is key for simulating a multi-country deployment.
     @Value("${country.code}")
     private String countryCode; // ES, UK, US, CN get this value from docker-compose
 
     @Value("${country.name}")
     private String countryName; // get this value from application.properties or docker-compose
 
+    // Spring Actuator's HealthEndpoint is used to get the real health status of the application.
     private final HealthEndpoint healthEndpoint;
 
     public ProductController(HealthEndpoint healthEndpoint) {
@@ -36,8 +43,7 @@ public class ProductController {
     }
 
     /**
-     * Retrieves all products.
-     * @return A ResponseEntity containing a list of all products.
+     * Fetches all products from the database.
      */
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
@@ -45,10 +51,9 @@ public class ProductController {
     }
 
     /**
-     * Retrieves products filtered by a specific country code.
-     * Example: http://localhost:8080/api/v1/products/country?countryCode=ES
-     * @param countryCode The country code to filter products by (e.g., "ES", "UK", "US", "CN").
-     * @return A ResponseEntity containing a list of products for the given country code.
+     * Finds all products belonging to a specific country.
+     * This allows the Item service to request data only from relevant instances.
+     * e.g., localhost:8080/api/v1/products/country?countryCode=ES
      */
     @GetMapping("/country")
     public ResponseEntity<List<ProductDTO>> getProductsByCountry(@RequestParam String countryCode) {
@@ -56,9 +61,7 @@ public class ProductController {
     }
 
     /**
-     * Retrieves a product by its unique identifier.
-     * @param id The ID of the product to retrieve.
-     * @return A ResponseEntity containing the found product.
+     * Gets a single product by its primary key.
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
@@ -66,28 +69,22 @@ public class ProductController {
     }
 
     /**
-     * Provides status information for the product service instance, including country details
-     * and health status. This endpoint simulates the status of different instances (ES, UK, US, CN).
-     * @return A Map containing country code, country name, health status, and current timestamp.
+     * A custom endpoint for other services to check the status and identity of this instance.
+     * It combines the instance's location (from environment variables) with its live health status.
      */
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
         Map<String, Object> response = new HashMap<>();
-
         String realStatus = healthEndpoint.health().getStatus().getCode();
-
         response.put("country_code", countryCode);
         response.put("country_name", countryName);
         response.put("status", realStatus);
         response.put("timestamp", LocalDateTime.now());
-
         return response;
     }
 
     /**
-     * Creates a new product.
-     * @param product The product object to be created.
-     * @return A ResponseEntity containing the created product and HTTP status CREATED.
+     * Creates a new product. The @Valid annotation triggers input validation.
      */
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product) {
@@ -95,10 +92,7 @@ public class ProductController {
     }
 
     /**
-     * Updates an existing product identified by its ID.
-     * @param id The ID of the product to update.
-     * @param productDetails The updated product details.
-     * @return A ResponseEntity containing the updated product.
+     * Updates an existing product.
      */
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product productDetails) {
@@ -106,9 +100,7 @@ public class ProductController {
     }
 
     /**
-     * Deletes a product by its unique identifier.
-     * @param id The ID of the product to delete.
-     * @return A ResponseEntity with no content and HTTP status NO_CONTENT.
+     * Deletes a product from the database.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {

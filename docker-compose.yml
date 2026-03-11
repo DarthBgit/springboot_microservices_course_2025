@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # --- Discovery Server (The "Receptionist") ---
+  # --- Eureka Server (The "Receptionist") ---
   eureka-server:
     build: ./EurekaServer
     container_name: eureka-server

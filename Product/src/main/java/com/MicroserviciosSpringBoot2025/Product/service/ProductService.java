@@ -7,13 +7,16 @@ import com.MicroserviciosSpringBoot2025.Product.exception.ResourceNotFoundExcept
 import com.MicroserviciosSpringBoot2025.Product.mapper.MapProductToDTO;
 import com.MicroserviciosSpringBoot2025.Product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing Product entities.
+ */
 @Service
 public class ProductService {
 
@@ -25,15 +28,15 @@ public class ProductService {
 
     /**
      * Constructs a ProductService with the given ProductRepository.
-     * @param productRepository The repository for product data.
+     * @param productRepository the repository for product data
      */
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
     /**
-     * Retrieves all products, enriching each with the current service instance's port.
-     * @return A list of all products as ProductDTOs.
+     * Retrieves all products.
+     * @return a list of all products as ProductDTOs
      */
     @Transactional(readOnly = true)
     public List<ProductDTO> findAll(){
@@ -46,10 +49,9 @@ public class ProductService {
     }
 
     /**
-     * Retrieves products filtered by a specific country code, enriching each with the current service instance's port.
-     * @param countryCode The country code to filter products by (e.g., "ES", "UK", "US", "CN").
-     * @return A list of products as ProductDTOs for the given country code.
-     * @throws IllegalArgumentException if the provided country code does not match a valid {@link Country} enum value.
+     * Retrieves products filtered by a specific country code.
+     * @param countryCode the country code to filter products by
+     * @return a list of products as ProductDTOs for the given country code
      */
     @Transactional
     public List<ProductDTO> findByCountryCode(String countryCode) {
@@ -63,10 +65,9 @@ public class ProductService {
     }
 
     /**
-     * Retrieves a product by its unique identifier, enriching it with the current service instance's port.
-     * @param id The ID of the product to retrieve.
-     * @return The found product as a ProductDTO.
-     * @throws ResourceNotFoundException if no product is found with the given ID.
+     * Retrieves a product by its unique identifier.
+     * @param id the ID of the product to retrieve
+     * @return the found product as a ProductDTO
      */
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
@@ -80,8 +81,8 @@ public class ProductService {
 
     /**
      * Saves a new product to the database.
-     * @param product The product entity to be saved.
-     * @return The saved product entity.
+     * @param product the product entity to be saved
+     * @return the saved product entity
      */
     @Transactional
     public Product save(Product product) {
@@ -90,10 +91,9 @@ public class ProductService {
 
     /**
      * Updates an existing product identified by its ID with new details.
-     * @param id The ID of the product to update.
-     * @param productDetails The product entity containing the updated details.
-     * @return The updated product as a ProductDTO.
-     * @throws ResourceNotFoundException if no product is found with the given ID.
+     * @param id the ID of the product to update
+     * @param productDetails the product entity containing the updated details
+     * @return the updated product as a ProductDTO
      */
     @Transactional
     public ProductDTO update(Long id, Product productDetails) {
@@ -113,8 +113,7 @@ public class ProductService {
 
     /**
      * Deletes a product by its unique identifier.
-     * @param id The ID of the product to delete.
-     * @throws ResourceNotFoundException if no product is found with the given ID.
+     * @param id the ID of the product to delete
      */
     @Transactional
     public void deleteById(Long id) {
@@ -122,13 +121,6 @@ public class ProductService {
         productRepository.delete(productToDelete);
     }
 
-    /**
-     * Returns the Product entity for a given ID.
-     * This is a helper method to ensure a product exists before performing operations like update or delete.
-     * @param id The ID of the product entity to retrieve.
-     * @return The found Product entity.
-     * @throws ResourceNotFoundException if no product is found with the given ID.
-     */
     private Product findEntityById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
