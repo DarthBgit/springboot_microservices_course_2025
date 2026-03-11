@@ -23,10 +23,18 @@ public class ProductService {
     @Autowired
     private Environment environment;
 
+    /**
+     * Constructs a ProductService with the given ProductRepository.
+     * @param productRepository The repository for product data.
+     */
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
+    /**
+     * Retrieves all products, enriching each with the current service instance's port.
+     * @return A list of all products as ProductDTOs.
+     */
     @Transactional(readOnly = true)
     public List<ProductDTO> findAll(){
         return productRepository.findAll().stream()
@@ -37,6 +45,12 @@ public class ProductService {
                 }).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves products filtered by a specific country code, enriching each with the current service instance's port.
+     * @param countryCode The country code to filter products by (e.g., "ES", "UK", "US", "CN").
+     * @return A list of products as ProductDTOs for the given country code.
+     * @throws IllegalArgumentException if the provided country code does not match a valid {@link Country} enum value.
+     */
     @Transactional
     public List<ProductDTO> findByCountryCode(String countryCode) {
         Country countryEnum = Country.valueOf(countryCode.toUpperCase());
@@ -48,6 +62,12 @@ public class ProductService {
                 }).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a product by its unique identifier, enriching it with the current service instance's port.
+     * @param id The ID of the product to retrieve.
+     * @return The found product as a ProductDTO.
+     * @throws ResourceNotFoundException if no product is found with the given ID.
+     */
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
         return productRepository.findById(id).map(product -> {
@@ -58,11 +78,23 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
+    /**
+     * Saves a new product to the database.
+     * @param product The product entity to be saved.
+     * @return The saved product entity.
+     */
     @Transactional
     public Product save(Product product) {
         return productRepository.save(product);
     }
 
+    /**
+     * Updates an existing product identified by its ID with new details.
+     * @param id The ID of the product to update.
+     * @param productDetails The product entity containing the updated details.
+     * @return The updated product as a ProductDTO.
+     * @throws ResourceNotFoundException if no product is found with the given ID.
+     */
     @Transactional
     public ProductDTO update(Long id, Product productDetails) {
         Product existingProduct = findEntityById(id); // Reuse findById to handle not-found case
@@ -79,6 +111,11 @@ public class ProductService {
         return MapProductToDTO.map(updatedProduct);
     }
 
+    /**
+     * Deletes a product by its unique identifier.
+     * @param id The ID of the product to delete.
+     * @throws ResourceNotFoundException if no product is found with the given ID.
+     */
     @Transactional
     public void deleteById(Long id) {
         Product productToDelete = findEntityById(id); // Ensures product exists before attempting to delete
@@ -86,9 +123,11 @@ public class ProductService {
     }
 
     /**
-     * Return the Product entity
-     * @param id
-     * @return
+     * Returns the Product entity for a given ID.
+     * This is a helper method to ensure a product exists before performing operations like update or delete.
+     * @param id The ID of the product entity to retrieve.
+     * @return The found Product entity.
+     * @throws ResourceNotFoundException if no product is found with the given ID.
      */
     private Product findEntityById(Long id) {
         return productRepository.findById(id)
