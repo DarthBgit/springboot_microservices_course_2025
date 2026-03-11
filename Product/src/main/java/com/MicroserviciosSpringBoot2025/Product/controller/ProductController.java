@@ -51,7 +51,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findById(id));
     }
 
-    // Status endpoint with additional info to simulate th status of the different instances ES, UK, US, CN
+    // Status endpoint with additional info to simulate th status of the different instances ES, UK, US, CNn
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
         Map<String, Object> response = new HashMap<>();
