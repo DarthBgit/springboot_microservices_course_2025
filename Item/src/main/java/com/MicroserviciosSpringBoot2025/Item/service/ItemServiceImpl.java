@@ -5,6 +5,8 @@ import com.MicroserviciosSpringBoot2025.Item.entity.InstanceStatusDTO;
 import com.MicroserviciosSpringBoot2025.Item.entity.ItemDTO;
 import com.MicroserviciosSpringBoot2025.Item.entity.Product;
 import com.MicroserviciosSpringBoot2025.Item.mapper.ProductToItemDTO;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.stereotype.Service;
@@ -33,9 +35,31 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Retry(name = "products") // First, it tries 3 times (configurable) before going to the fallback method
+    @CircuitBreaker(name = "products", fallbackMethod = "getProductsFallback")
     public Flux<ItemDTO> findAll() {
         return webClientService.findAll()
                 .map(product -> createItemWithLogic(product, random.nextInt(10) + 1));
+    }
+
+    /**
+     * Fallback method for the findAll operation.
+     * Returns a Flux containing a default ItemDTO when the product service is unreachable.
+     */
+    public Flux<ItemDTO> getProductsFallback(Throwable t) {
+        ItemDTO fallbackItem = new ItemDTO();
+
+        // Setting default data to inform the user or the next service
+        fallbackItem.setName("Product Service Unavailable");
+        fallbackItem.setLocationSummary("Information currently not available (Circuit Breaker)");
+        fallbackItem.setCountry("N/A");
+        fallbackItem.setQuantity(0);
+        fallbackItem.setOriginalPrice(0.0);
+        fallbackItem.setPriceInEur(0.0);
+        fallbackItem.setOriginalCurrency("None");
+        fallbackItem.setExchangeRate(1.0);
+
+        return Flux.just(fallbackItem);
     }
 
     @Override
