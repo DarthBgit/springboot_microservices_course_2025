@@ -63,6 +63,7 @@ services:
     container_name: product-uk
     ports:
       - "8082:8080"
+      - "5007:5005" # Debug access via 5007
     environment:
       - SPRING_APPLICATION_NAME=product-service
       - COUNTRY_CODE=uk
@@ -71,6 +72,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # This line enables debug mode for IntelliJ
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - micro-network
     depends_on:
@@ -83,6 +86,7 @@ services:
     container_name: product-us
     ports:
       - "8083:8080"
+      - "5008:5005" # Debug access via 5008
     environment:
       - SPRING_APPLICATION_NAME=product-service
       - COUNTRY_CODE=US
@@ -91,6 +95,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # This line enables debug mode for IntelliJ
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - micro-network
     depends_on:
@@ -146,15 +152,15 @@ services:
 
 # --- Gateway Service ---
   gateway-server:
-    build: ./GatewayServer
+    build: ./Gateway
     container_name: gateway-server
     ports:
       - "8090:8080"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      # Config for Gateway Timeouts (Must be higher than Resilience 4j timeouts)
-      - SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT=5000
-      - SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT=5s
+      # Config for Gateway Timeouts (Must be higher than Resilience 4j timeouts) - Spring Boot 4.x format
+      - SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_HTTPCLIENT_CONNECT_TIMEOUT=5000
+      - SPRING_CLOUD_GATEWAY_SERVER_WEBFLUX_HTTPCLIENT_RESPONSE_TIMEOUT=5s
     networks:
       - micro-network
     depends_on:

@@ -1,0 +1,532 @@
+{
+  "info": {
+    "_postman_id": "circuit-breaker-tests-2025",
+    "name": "Circuit Breaker - Microservices 2025",
+    "description": "Complete collection to test the Resilience4j Circuit Breaker in your microservices architecture",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1️⃣ HEALTH CHECKS - Verify Services",
+      "description": "Verify that all services are healthy before running tests",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["actuator", "health"]
+            },
+            "description": "Verify that the Gateway is UP"
+          },
+          "response": []
+        },
+        {
+          "name": "Item Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["actuator", "health"]
+            },
+            "description": "Verify that the Item Service is UP"
+          },
+          "response": []
+        },
+        {
+          "name": "Product Service (Spain) Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/actuator/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["actuator", "health"]
+            },
+            "description": "Verify that the Product Service is UP"
+          },
+          "response": []
+        },
+        {
+          "name": "Eureka - View Registered Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8761/eureka/apps",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8761",
+              "path": ["eureka", "apps"]
+            },
+            "description": "List all services registered in Eureka"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2️⃣ NORMAL OPERATIONS - Circuit Breaker CLOSED ✅",
+      "description": "Tests when the Circuit Breaker is closed (normal operation)",
+      "item": [
+        {
+          "name": "Get All Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "Gets all items. Circuit Breaker should be CLOSED"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Item with Quantity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items/1/5",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items", "1", "5"]
+            },
+            "description": "Gets a specific item with quantity. Expected response: 200 OK"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "products"]
+            },
+            "description": "Gets all products from the Gateway"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Products by Country",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/products/country?countryCode=ES",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "products", "country"],
+              "query": [
+                {
+                  "key": "countryCode",
+                  "value": "ES"
+                }
+              ]
+            },
+            "description": "Gets products from a specific country (Spain)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Global Instance Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items/global_status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items", "global_status"]
+            },
+            "description": "Gets the status of ALL Product Service instances"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/products/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "products", "1"]
+            },
+            "description": "Gets a specific product by ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3️⃣ SIMULATE FAILURE - Activate Circuit Breaker 🛑",
+      "description": "Steps to simulate a failure and activate the Circuit Breaker",
+      "item": [
+        {
+          "name": "[1] Get Items BEFORE stopping services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "✅ Should respond 200 OK\n\nThis request should work normally. The Circuit Breaker is CLOSED."
+          },
+          "response": []
+        },
+        {
+          "name": "[2] INSTRUCTION: Open terminal and execute",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🔴 MANUAL INSTRUCTION:\n\n1. Open a TERMINAL\n2. Execute this command:\n\n```bash\ndocker stop product-es product-uk product-us product-cn\n```\n\n3. Wait 3 seconds\n4. Return to Postman and execute the following requests\n\nThis will stop all Product Services and the Circuit Breaker should activate."
+          },
+          "response": []
+        },
+        {
+          "name": "[3] Get Items ATTEMPT 1 (after stopping)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ May respond 500 ERROR\n\nThis is the first attempt after stopping services. The Load Balancer will likely return 503."
+          },
+          "response": []
+        },
+        {
+          "name": "[4] Get Items ATTEMPT 2",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ May respond 500 ERROR\n\nSecond attempt. The error persists."
+          },
+          "response": []
+        },
+        {
+          "name": "[5] Get Items ATTEMPT 3",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ May respond 500 ERROR\n\nThird attempt. After multiple failures, the Circuit Breaker should open."
+          },
+          "response": []
+        },
+        {
+          "name": "[6] Get Items ATTEMPT 4",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🛑 Circuit Breaker should be OPEN\n\nAll subsequent requests will be rejected quickly"
+          },
+          "response": []
+        },
+        {
+          "name": "[7] Get Items ATTEMPT 5",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🛑 Circuit Breaker is OPEN\n\nResponds quickly with rejection"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4️⃣ RECOVERY - Circuit Breaker HALF-OPEN ⚠️",
+      "description": "Steps to recover the service and close the Circuit Breaker",
+      "item": [
+        {
+          "name": "[1] INSTRUCTION: Wait 10 seconds",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⏳ MANUAL INSTRUCTION:\n\nThe wait-duration-in-open-state is configured to 10 seconds.\n\nWait 10 seconds after the Circuit Breaker was activated.\n\nAfter 10 seconds, the state changes to HALF-OPEN and allows limited tests."
+          },
+          "response": []
+        },
+        {
+          "name": "[2] INSTRUCTION: Restart Product Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🔄 MANUAL INSTRUCTION:\n\n1. Open a TERMINAL\n2. Execute this command to RESTART the Product Services:\n\n```bash\ndocker start product-es product-uk product-us product-cn\n```\n\n3. Wait ~15 seconds for them to register in Eureka\n4. Then execute the following requests"
+          },
+          "response": []
+        },
+        {
+          "name": "[3] Get Items HALF-OPEN TEST 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ Circuit Breaker in HALF-OPEN state\n\nAllows 3 test calls (permitted-number-of-calls-in-half-open-state=3)\n\nIf this call works → will likely respond 200 OK\nIf services are still down → will respond 500"
+          },
+          "response": []
+        },
+        {
+          "name": "[4] Get Items HALF-OPEN TEST 2",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ Second attempt in HALF-OPEN\n\nIf all 3 calls succeed, the Circuit Breaker closes"
+          },
+          "response": []
+        },
+        {
+          "name": "[5] Get Items HALF-OPEN TEST 3",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "⚠️ Third attempt in HALF-OPEN\n\nThird and final test. If it works, the Circuit Breaker CLOSES"
+          },
+          "response": []
+        },
+        {
+          "name": "[6] Get Items - Circuit CLOSED ✅",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "✅ Circuit Breaker should be CLOSED\n\nNormal operation again. Calls pass through normally."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5️⃣ MONITORING - View Circuit Breaker Status",
+      "description": "Endpoints to monitor the Circuit Breaker status",
+      "item": [
+        {
+          "name": "Actuator - Available Endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/actuator",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["actuator"]
+            },
+            "description": "Lists all available endpoints in Item Service Actuator"
+          },
+          "response": []
+        },
+        {
+          "name": "Circuit Breaker - Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/actuator/circuitbreakers",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["actuator", "circuitbreakers"]
+            },
+            "description": "Detailed Circuit Breaker information (if configured)"
+          },
+          "response": []
+        },
+        {
+          "name": "Metrics - Circuit Breaker State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/actuator/metrics/resilience4j.circuitbreaker.state",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["actuator", "metrics", "resilience4j.circuitbreaker.state"]
+            },
+            "description": "Metrics of the current Circuit Breaker state (0=CLOSED, 1=OPEN, 2=HALF_OPEN)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6️⃣ DIAGNOSTICS - Debugging",
+      "description": "Commands for diagnostics and debugging",
+      "item": [
+        {
+          "name": "[CLI] View Item Service logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🔍 TERMINAL COMMAND:\n\n```bash\ndocker logs -f item-service\n```\n\nLook for lines like:\n- `CircuitBreaker 'products' state transition from CLOSED to OPEN`\n- `No servers available for service: product-service`\n- `WebClientResponseException$ServiceUnavailable: 503`"
+          },
+          "response": []
+        },
+        {
+          "name": "[CLI] View Gateway logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🔍 TERMINAL COMMAND:\n\n```bash\ndocker logs -f gateway-server\n```\n\nVerify that the Gateway is routing correctly"
+          },
+          "response": []
+        },
+        {
+          "name": "[CLI] View services registered in Eureka",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8761/eureka/apps",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8761",
+              "path": ["eureka", "apps"]
+            },
+            "description": "🔍 TERMINAL COMMAND:\n\n```bash\ncurl http://localhost:8761/eureka/apps | grep \"<name>\" | sort | uniq\n```\n\nVerify that PRODUCT-SERVICE, ITEM-SERVICE and MSVC-GATEWAY are registered"
+          },
+          "response": []
+        },
+        {
+          "name": "[CLI] View Docker containers status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8090/api/items",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8090",
+              "path": ["api", "items"]
+            },
+            "description": "🔍 TERMINAL COMMAND:\n\n```bash\ndocker ps --format \"table {{.Names}}\\t{{.Status}}\"\n```\n\nVerify that all containers are running"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
